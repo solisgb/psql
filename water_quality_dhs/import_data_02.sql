@@ -281,3 +281,67 @@ add foreign key (id_punto)
 references quim.w2_puntos_sup (id)
 ;
 
+-- 5. 1. Arreglar unidades
+select t.id_par , t.uds , count(*)
+from quim.w2_det_sup t
+group by t.id_par , t.uds 
+order by t.id_par , t.uds
+;
+
+update quim.w2_det_sup t
+set uds = 'ºc'
+where t.id_par = 'temper' and t.uds = 'µs/cm'
+returning *
+;
+
+-- Homogeneizar unidades 
+with p as (
+	select t.id_par , t.uds
+	from quim.w2_det_sup t
+	group by t.id_par , t.uds 
+	order by t.id_par , t.uds
+)
+select p.id_par, count(p.id_par)
+from p
+group by p.id_par 
+having count(p.id_par) > 1
+order by p.id_par
+;
+
+/* Los parámetros con distintas unidades son
+"id_par","count"
+b,2
+cn,2
+fluoru_2,2
+nitrat_2,2
+nitrit_2,2
+phcamp,2
+*/
+
+select t.id_par , t.uds, min(t.fecha) , max(t.fecha) , min(t.valort) t , max(t.valort ) t, count(*)
+from quim.w2_det_sup t
+where t.id_par = 'b'
+group by t.id_par , t.uds 
+order by t.id_par , t.uds
+;
+
+/*
+Resultado
+|id_par|uds |min       |max       |min|max  |count|
+|------|----|----------|----------|---|-----|-----|
+|b     |µg/l|1993-04-20|2021-08-16|0  |8,390|3,879|
+|b     |mg/l|2021-08-05|2021-11-23|0  |6,400|27   |
+
+*
+*
+**/
+select t.valort, t.valorn 
+from quim.w2_det_sup t
+where t.id_par = 'b' and t.uds = 'µg/l' and t.valort ~ '^<'
+group by t.valort, t.valorn
+;
+
+
+
+
+
