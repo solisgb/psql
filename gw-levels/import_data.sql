@@ -125,24 +125,75 @@ from tmp.chspz t
 on conflict do nothing
 ;
 
--- ahora tengo que sustituir id oficial por id tipo igme
-
-
--- primero veo si están todos
-select 
-from tmp.ipa2 i 
-	join 
-
-
-
-
---insert into tmp.ipa2 (cod, fecha, situacion, pnp, instalado, tuboguia, tr, proyecto, codigosonda, medidor, pnp_original) 
-select t.cod, t2.fecha, t2.situacion, t2.pnp, t2.instalacionsn, t2.tuboguiasn, t2.tr, t2.proyecto, t2.codigosonda, t2.observ, t2.medidor, t2.pnp_original 
-from tmp.ipa2 t
-on conflict on constraint ipa2_pkey
-do update set pnp_original = t.excluded.pnp_original
+update tmp.ipa2
+set cod = trim(cod) 
 ;
 
+-- ahora tengo que sustituir id oficial por id tipo igme
+
+-- primero veo si están todos
+select t1.cod , t1.cod_red , t1.red , t1.fecha_alta , t1.fecha_baja 
+from ipas.ipa1_red_control t1 
+where t1.red = 'chspz'
+;
+
+select distinct t.cod, t1.cod  
+from tmp.ipa2 t
+	left join ipas.ipa1_red_control t1 on (t.cod = t1.cod_red) 
+where t1.red = 'chspz'
+order by t.cod 
+;
+
+-- están todos, ahora puedo insertar los datos en ipa2
+
+-- veo un resumen de lo último que tengo cargado
+select extract(year from t.fecha) "year", extract(month from t.fecha) "month" , count(*)
+from ipas.ipa2 t
+where t.fecha > '2020-06-06'
+group by extract(year from t.fecha), extract(month from t.fecha)
+order by extract(year from t.fecha), extract(month from t.fecha)
+;
+/*
+|year |month|count|
+|-----|-----|-----|
+|2,020|6    |82   |
+|2,020|7    |124  |
+|2,020|8    |127  |
+|2,020|9    |64   |
+|2,020|10   |116  |
+|2,020|11   |81   |
+|2,020|12   |109  |
+|2,021|1    |81   |
+|2,021|2    |95   |
+|2,021|3    |130  |
+|2,021|4    |106  |
+|2,021|5    |109  |
+|2,021|6    |43   |
+|2,021|7    |121  |
+|2,021|8    |119  |
+|2,021|9    |31   |
+ */
+
+
+-- lo que voya insertar
+select t1.cod , t2.fecha , t2.situacion , t2.pnp , t2.instalado , t2.tuboguia , t2.tr ,
+	t2.proyecto , t2.pnp_original 
+from tmp.ipa2 t2
+	left join ipas.ipa1_red_control t1 on (t2.cod = t1.cod_red) 
+where t1.red = 'chspz' and t2.fecha > '2020-01-01'
+;
+
+-- ahora inserto
+insert into ipas.ipa2 (cod , fecha , situacion , pnp , instalado , tuboguia , tr ,
+	proyecto , pnp_original) 
+	select t1.cod , t2.fecha , t2.situacion , t2.pnp , t2.instalado , t2.tuboguia , t2.tr ,
+		t2.proyecto , t2.pnp_original 
+	from tmp.ipa2 t2
+		left join ipas.ipa1_red_control t1 on (t2.cod = t1.cod_red) 
+	where t1.red = 'chspz' and t2.fecha > '2020-01-01'
+on conflict on constraint ipa2_pkey
+do update set pnp_original = excluded.pnp 
+;
 
 
 
