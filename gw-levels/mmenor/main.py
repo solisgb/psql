@@ -6,24 +6,44 @@ Created on Thu Apr  7 11:54:17 2022
 """
 import littleLogging as logging
 
+# ================ parameters ============================
+
 org = r'H:\LSGB\data2db\SAIH_pz_Mar_Menor_20220303_v02.csv'
-dst = r'H:\LSGB\20220324_informe_pz\data_chs\pz_mmenor.csv'
+
+# piezometric data
+# dst = r'H:\LSGB\20220324_informe_pz\data_chs\pz_mmenor_saih.csv'
+# first_col = 0
+# npuntos = 19
+# step = 6
+
+# pp data
+dst = r'H:\LSGB\20220324_informe_pz\data_chs\pp_mmenor_saih.csv'
+first_col = 114
+npuntos = 2
+step = 2
+
+# q albujon
+# dst = r'H:\LSGB\20220324_informe_pz\data_chs\albujon_saih.csv'
+# first_col = 115
+# npuntos = 1
+# step = 2
+
+# =============================================================
 
 
 if __name__ == "__main__":
 
     try:
-        from datetime import datetime
         from time import time
         import traceback
 
-        import chg_format_pz_saih as cf
-
-        now = datetime.now()
+        from change_format import Change_format
 
         startTime = time()
 
-        cf.chg_format_pz_saih(org, dst)
+        cf = Change_format(org, dst, first_col, npuntos, step)
+
+        cf.chg_format()
 
         xtime = time() - startTime
         print(f'El script tardó {xtime:0.1f} s')
