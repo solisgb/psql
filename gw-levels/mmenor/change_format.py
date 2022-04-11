@@ -11,7 +11,7 @@ class Change_format():
 
     def __init__(self, org, dst, first_col, npuntos, step):
         """
-        Read some data from a csv file org and write them in another format
+        Reads some data from a csv file org and write them in another format
 
         Parameters
         ----------
@@ -46,7 +46,12 @@ class Change_format():
         ----------
         stop_at_line : int
             execution stops after #line in self.org =stop_at_line
+            If you want to read all the lines keep the default value
             first line is 0, not 1
+            line 0 gets station codes
+            line 1 gets headers
+            line 2 gets first line of data
+
 
         Returns
         -------
@@ -76,6 +81,8 @@ class Change_format():
                             c1 = c2
                             c2 += self.step
                             continue
+                        tdate1 = cells[1].split('/')
+                        cells[1] = f'{tdate1[1]}/{tdate1[0]}/{tdate1[2]}'
                         writer.writerow(cells)
                         # print(ids[i], row[c1:c2])
                         c1 = c2
