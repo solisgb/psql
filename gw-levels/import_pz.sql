@@ -195,5 +195,39 @@ on conflict on constraint ipa2_pkey
 do update set pnp_original = excluded.pnp 
 ;
 
+-- piezometros chs mar menor
+create table if not exists ipas.ipa1_pzchsmm (
+	id varchar primary key,
+	name varchar,
+	x real,
+	y real,
+	z real,
+	zref real,
+	"ref" varchar,
+	tm	varchar,
+	prov varchar
+)
+;
+
+copy ipas.ipa1_pzchsmm
+from 'H:\IGME2020\data2db\sondeos_red_control_mm.csv' 
+with CSV header delimiter ';' 
+encoding 'UTF-8'
+;
+
+select AddGeometryColumn ('ipas','ipa1_pzchsmm','geom', 25830,'POINT',2);
+create index on ipas.ipa1_pzchsmm using gist (geom);
+update ipas.ipa1_pzchsmm set geom = st_setsrid(st_makepoint(x, y), 25830);
+
+alter table ipas.ipa1_pzchsmm drop column x;
+
+alter table ipas.ipa1_pzchsmm drop column y;
+
+select *
+from ipas.ipa1_pzchsmm
+;
+
+
+
 
 
